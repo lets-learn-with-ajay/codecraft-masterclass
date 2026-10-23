@@ -1,0 +1,9 @@
+/Users/ajaysingh/Ajay/test/youtube-pipeline/github-repo/codecraft-masterclass/06-rust-systems/ep01/target/debug/deps/signal_hook_registry-345cfb0389d239fc.d: /Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/lib.rs /Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/half_lock.rs /Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/vec_map.rs
+
+/Users/ajaysingh/Ajay/test/youtube-pipeline/github-repo/codecraft-masterclass/06-rust-systems/ep01/target/debug/deps/libsignal_hook_registry-345cfb0389d239fc.rlib: /Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/lib.rs /Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/half_lock.rs /Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/vec_map.rs
+
+/Users/ajaysingh/Ajay/test/youtube-pipeline/github-repo/codecraft-masterclass/06-rust-systems/ep01/target/debug/deps/libsignal_hook_registry-345cfb0389d239fc.rmeta: /Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/lib.rs /Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/half_lock.rs /Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/vec_map.rs
+
+/Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/lib.rs:
+/Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/half_lock.rs:
+/Users/ajaysingh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/vec_map.rs:

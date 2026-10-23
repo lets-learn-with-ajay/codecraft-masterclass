@@ -1,47 +1,55 @@
-# 🏗️ Track 5: Modern Distributed System Design & Scalability
+# ⚡ Track: Modern Distributed System Design & Scalability
 
-> **Master large-scale architecture, sharding, event-driven streaming, and caching**
+> **Domain**: System Architecture • **Tagline**: Master large-scale architecture, sharding, event-driven streaming, and caching
 
-[![YouTube Playlist](https://img.shields.io/badge/YouTube-Playlist-FF0000?style=for-the-badge&logo=youtube)](https://youtube.com/playlist?list=PLLRN-SC_xr2w)
-[![Domain: System Architecture](https://img.shields.io/badge/Domain-System_Architecture-fb923c?style=for-the-badge)](#)
+Official YouTube Playlist: [Watch Playlist](https://www.youtube.com/playlist?list=PLLRN-SC_xr2w)
+
+## 📚 Episode Navigation & Curriculum
+
+| Ep | Level | Title | Code |
+|:--:|:-----:|-------|:----:|
+| 01 | `BASIC` | Database Scaling: Sharding, Consistent Hashing & Hotspot Defense | [`ep01-database-sharding-hotspots`](ep01-database-sharding-hotspots/) |
+| 02 | `BASIC` | Distributed Caching & Cache Stampede Defense with Redis | [`ep02-distributed-caching-xfetch`](ep02-distributed-caching-xfetch/) |
+| 03 | `BASIC` | Event-Driven Architecture with Apache Kafka & Idempotency | [`ep03-kafka-event-driven-architecture`](ep03-kafka-event-driven-architecture/) |
+| 04 | `BASIC` | Distributed Transactions: The Saga Pattern & Transactional Outbox | [`ep04-distributed-transactions-saga-outbox`](ep04-distributed-transactions-saga-outbox/) |
+| 05 | `BASIC` | Distributed Rate Limiting: Token Bucket vs Sliding Window Log | [`ep05-distributed-rate-limiting`](ep05-distributed-rate-limiting/) |
+| 06 | `BASIC` | Real-Time Chat & Notification Scaling: WebSockets + Redis Pub/Sub | [`ep06-realtime-chat-websockets`](ep06-realtime-chat-websockets/) |
+| 07 | `BASIC` | Distributed Locking & Consensus: Redlock vs Raft/Zookeeper | [`ep07-distributed-locking-redlock`](ep07-distributed-locking-redlock/) |
+| 08 | `BASIC` | API Gateway Design: Reverse Proxies, SSL & Global Edge Routing | [`ep08-api-gateway-edge-routing`](ep08-api-gateway-edge-routing/) |
+| 09 | `BASIC` | High-Throughput Ingestion: LSM Trees, ClickHouse & Time-Series DBs | [`ep09-write-heavy-ingestion-lsm-trees`](ep09-write-heavy-ingestion-lsm-trees/) |
+| 10 | `BASIC` | Disaster Recovery, Multi-Region Active-Active & Split-Brain Mitigation | [`ep10-disaster-recovery-active-active`](ep10-disaster-recovery-active-active/) |
+| 11 | `INTERMEDIATE` | The Consistency Spectrum: Linearizability, Sequential, Causal & Eventual Consistency | [`ep11-consistency-spectrum-cap-pacelc`](ep11-consistency-spectrum-cap-pacelc/) |
+| 12 | `INTERMEDIATE` | Distributed Time & Ordering: Physical Clocks, Lamport Timestamps & Vector Clocks | [`ep12-distributed-time-lamport-vector-clocks`](ep12-distributed-time-lamport-vector-clocks/) |
+| 13 | `INTERMEDIATE` | Google Spanner TrueTime & CockroachDB Hybrid Logical Clocks (HLC) | [`ep13-spanner-truetime-cockroach-hlc`](ep13-spanner-truetime-cockroach-hlc/) |
+| 14 | `INTERMEDIATE` | Conflict-Free Replicated Data Types (CRDTs): State-Based vs Operation-Based Resolution | [`ep14-crdt-conflict-free-replicated-data-types`](ep14-crdt-conflict-free-replicated-data-types/) |
+| 15 | `INTERMEDIATE` | Distributed Consensus Deep Dive: Paxos vs Raft vs Zab (ZooKeeper Atomic Broadcast) | [`ep15-consensus-deep-dive-paxos-raft-zab`](ep15-consensus-deep-dive-paxos-raft-zab/) |
+| 16 | `INTERMEDIATE` | Modern Event Streaming: Apache Kafka vs Apache Pulsar vs Redpanda | [`ep16-modern-event-streaming-kafka-pulsar-redpanda`](ep16-modern-event-streaming-kafka-pulsar-redpanda/) |
+| 17 | `INTERMEDIATE` | Change Data Capture (CDC): Streaming Database Mutations with Debezium & Kafka Connect | [`ep17-cdc-debezium-kafka-connect`](ep17-cdc-debezium-kafka-connect/) |
+| 18 | `INTERMEDIATE` | Distributed Object Storage: Architectural Deep Dive into Google File System (GFS), Ceph & MinIO | [`ep18-distributed-object-storage-gfs-ceph-minio`](ep18-distributed-object-storage-gfs-ceph-minio/) |
+| 19 | `INTERMEDIATE` | Multi-Region Database Topologies: Active-Passive, Multi-Leader & Geo-Partitioned Sharding | [`ep19-multiregion-database-topologies`](ep19-multiregion-database-topologies/) |
+| 20 | `INTERMEDIATE` | Distributed Search & Ingestion: Architectural Internals of Elasticsearch & OpenSearch Clusters | [`ep20-distributed-search-elasticsearch-opensearch`](ep20-distributed-search-elasticsearch-opensearch/) |
+| 21 | `INTERMEDIATE` | Distributed Unique ID Generation: Snowflake IDs, ULIDs, and UUIDv7 for High-Throughput DBs | [`ep21-distributed-unique-id-generation`](ep21-distributed-unique-id-generation/) |
+| 22 | `INTERMEDIATE` | Designing a Resilient Distributed Job Scheduler: Cron at Scale | [`ep22-distributed-job-schedulers-cron-at-scale`](ep22-distributed-job-schedulers-cron-at-scale/) |
+| 23 | `ADVANCED` | Service Mesh Architecture: Envoy Data Plane, mTLS, Sidecars & Istio Ambient Mesh | [`ep23-service-mesh-envoy-istio-ambient`](ep23-service-mesh-envoy-istio-ambient/) |
+| 24 | `ADVANCED` | Chaos Engineering: Injecting Network Partitions, Packet Loss & Latency with Chaos Mesh | [`ep24-chaos-engineering-litmus-chaos-mesh`](ep24-chaos-engineering-litmus-chaos-mesh/) |
+| 25 | `ADVANCED` | Distributed Tracing at Planetary Scale: OpenTelemetry Collector Topologies & Tail-Based Sampling | [`ep25-distributed-tracing-planetary-scale`](ep25-distributed-tracing-planetary-scale/) |
+| 26 | `ADVANCED` | Designing Planetary-Scale CDNs: Anycast BGP Routing, Edge PoPs & Sub-Second Invalidation | [`ep26-planetary-cdn-anycast-bgp`](ep26-planetary-cdn-anycast-bgp/) |
+| 27 | `ADVANCED` | Zero-Downtime Database Migrations: Blue-Green Data Sync, Expand-Contract Pattern & Ghost Writes | [`ep27-zero-downtime-database-migrations`](ep27-zero-downtime-database-migrations/) |
+| 28 | `ADVANCED` | Consensus Under Byzantine Faults: Byzantine Fault Tolerance (BFT) vs Crash Fault Tolerance (CFT) | [`ep28-byzantine-fault-tolerance-bft`](ep28-byzantine-fault-tolerance-bft/) |
+| 29 | `ADVANCED` | Distributed Caching Topologies: Two-Tier L1/L2 Caches, Near-Caches & Consistency Invalidation | [`ep29-two-tier-caching-near-cache`](ep29-two-tier-caching-near-cache/) |
+| 30 | `ADVANCED` | High-Frequency Distributed Counters: Aggregation & Batch Flushing with Redis & Kafka | [`ep30-high-frequency-distributed-counters`](ep30-high-frequency-distributed-counters/) |
+| 31 | `ADVANCED` | Jepsen Testing: Black-Box Verification of Linearizability & Partition Resilience in Distributed DBs | [`ep31-jepsen-testing-linearizability-verification`](ep31-jepsen-testing-linearizability-verification/) |
+| 32 | `ADVANCED` | Edge Compute & Distributed State: Deploying Compute to Cloudflare Workers with Global Replicas | [`ep32-edge-compute-distributed-state`](ep32-edge-compute-distributed-state/) |
+| 33 | `ADVANCED` | System Design Capstone (Part 1): Global Payment Engine — Ledger & Invariant Architecture | [`ep33-system-design-capstone-payment-engine-ledger`](ep33-system-design-capstone-payment-engine-ledger/) |
+| 34 | `ADVANCED` | System Design Capstone (Part 2): Global Payment Engine — Distributed 2PC, Outbox & Idempotency | [`ep34-system-design-capstone-payment-engine-2pc-outbox`](ep34-system-design-capstone-payment-engine-2pc-outbox/) |
+| 35 | `ADVANCED` | System Design Capstone (Part 3): Global Payment Engine — Multi-Region Active-Active & Disaster Failover | [`ep35-system-design-capstone-payment-engine-active-active`](ep35-system-design-capstone-payment-engine-active-active/) |
 
 ---
 
-## 📖 Overview
-
-In this masterclass track, you will learn the core principles of designing massive-scale, fault-tolerant **Distributed Systems**. From database sharding and consistent hashing to Kafka event-driven architectures, distributed transactions (Saga & Outbox), sliding-window rate limiters, Redlock consensus, API Gateway routing, and multi-region active-active disaster recovery, this track equips you with senior-level system design skills.
-
----
-
-## 🗺️ Episodes & Roadmap
-
-| Ep | Episode Title | Key Highlights | Code |
-|:--:|---------------|----------------|:----:|
-| **01** | [Database Scaling: Sharding, Consistent Hashing & Hotspot Defense](ep01-database-sharding-hotspots/) | Shard keys, virtual consistent hashing rings, hotspot mitigation | [📂 Code](ep01-database-sharding-hotspots/) |
-| **02** | [Distributed Caching & Cache Stampede Defense with Redis](ep02-distributed-caching-xfetch/) | Write-through / cache-aside, probabilistic early expiration (XFetch) | [📂 Code](ep02-distributed-caching-xfetch/) |
-| **03** | [Event-Driven Architecture with Apache Kafka & Idempotency](ep03-kafka-event-driven-architecture/) | Kafka partitions, consumer groups, idempotency keys, exactly-once | [📂 Code](ep03-kafka-event-driven-architecture/) |
-| **04** | [Distributed Transactions: The Saga Pattern & Transactional Outbox](ep04-distributed-transactions-saga-outbox/) | Choreographed/orchestrated sagas, CDC / Transactional Outbox | [📂 Code](ep04-distributed-transactions-saga-outbox/) |
-| **05** | [Distributed Rate Limiting: Token Bucket vs Sliding Window Log](ep05-distributed-rate-limiting/) | Redis Lua scripts, token buckets, sliding window rate limits | [📂 Code](ep05-distributed-rate-limiting/) |
-| **06** | [Real-Time Chat & Notification Scaling: WebSockets + Redis Pub/Sub](ep06-realtime-chat-websockets/) | Connection managers, Redis pub/sub backplanes, socket clustering | [📂 Code](ep06-realtime-chat-websockets/) |
-| **07** | [Distributed Locking & Consensus: Redlock vs Raft/Zookeeper](ep07-distributed-locking-redlock/) | Redis Redlock, fencing tokens, Raft consensus, leader election | [📂 Code](ep07-distributed-locking-redlock/) |
-| **08** | [API Gateway Design: Reverse Proxies, SSL & Global Edge Routing](ep08-api-gateway-edge-routing/) | Reverse proxy architecture, TLS termination, Anycast CDN routing | [📂 Code](ep08-api-gateway-edge-routing/) |
-| **09** | [High-Throughput Ingestion: LSM Trees, ClickHouse & Time-Series DBs](ep09-write-heavy-ingestion-lsm-trees/) | MemTables, SSTables, ClickHouse columnar storage for 1M events/sec | [📂 Code](ep09-write-heavy-ingestion-lsm-trees/) |
-| **10** | [Disaster Recovery, Multi-Region Active-Active & Split-Brain Mitigation](ep10-disaster-recovery-active-active/) | Multi-region active-active replication, CRDTs, quorum DNS failover | [📂 Code](ep10-disaster-recovery-active-active/) |
-
----
-
-## 🛠️ Tech Stack & Prerequisites
-
-- **Streaming & Messaging**: Apache Kafka, Redis Pub/Sub, RabbitMQ
-- **Databases & Storage**: PostgreSQL (Sharded), ClickHouse, Neo4j, Redis Cluster
-- **Gateways & Proxies**: Envoy, NGINX, Cloudflare Anycast
-- **Simulation & Visuals**: Python / Go simulation scripts, PlantUML / Mermaid diagrams
-
----
-
-## ⚡ Quick Start
+## 🚀 How to Use
+Each episode folder contains runnable production source code, configuration files, and architectural diagrams.
+Navigate to any episode subfolder and follow the local instructions.
 
 ```bash
-cd 05-distributed-system-design/ep01-database-sharding-hotspots
-python simulation.py
+cd 05-distributed-system-design/ep01-*/
 ```
