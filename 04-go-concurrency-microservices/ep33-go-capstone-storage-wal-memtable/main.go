@@ -33,6 +33,53 @@ func (w *WriteAheadLog) AppendRecord(key, val []byte) (uint64, error) {
     return w.lsn, w.file.Sync()
 }
 
+// Phase 2: Concurrent In-Memory MemTable with Flush Watermark
+package storage
+
+import "sync"
+
+type MemTableEntry struct {
+    Value     []byte
+    LSN       uint64
+    Tombstone bool
+}
+
+type ShardedMemTable struct {
+    mu        sync.RWMutex
+    entries   map[string]MemTableEntry
+    sizeBytes int64
+    maxBytes  int64
+}
+
+func (m *ShardedMemTable) Put(key string, val []byte, lsn uint64) bool {
+    m.mu.Lock()
+    defer m.mu.Unlock()
+    m.entries[key] = MemTableEntry{Value: val, LSN: lsn}
+    m.sizeBytes += int64(len(key) + len(val))
+    return m.sizeBytes >= m.maxBytes
+}
+
+// Phase 3: Deterministic Crash Recovery & WAL Checksum Verification
+package storage
+
+import (
+    "encoding/binary"
+    "errors"
+    "hash/crc32"
+)
+
+func VerifyWALFrame(frame []byte) (uint64, error) {
+    if len(frame) < 20 {
+        return 0, errors.New("corrupted WAL frame: truncated header")
+    }
+    expectedCRC := binary.LittleEndian.Uint32(frame[0:4])
+    actualCRC := crc32.ChecksumIEEE(frame[4:])
+    if expectedCRC != actualCRC {
+        return 0, errors.New("corrupted WAL frame: CRC32 mismatch")
+    }
+    return binary.LittleEndian.Uint64(frame[4:12]), nil
+}
+
 func main() {
     // CodeCraft Masterclass entry point
 }

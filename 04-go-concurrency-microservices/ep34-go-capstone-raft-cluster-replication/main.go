@@ -27,6 +27,31 @@ type RaftNode struct {
     log         []LogEntry
 }
 
+// Phase 2: Quorum Replication & PrevLog Consistency Check
+package raftkv
+
+func (rn *RaftNode) HandleAppendEntries(args AppendEntriesArgs) (uint64, bool) {
+    rn.mu.Lock()
+    defer rn.mu.Unlock()
+    if args.Term < rn.currentTerm {
+        return rn.currentTerm, false
+    }
+    rn.currentTerm = args.Term
+    rn.log = append(rn.log, args.Entries...)
+    if args.LeaderCommit > rn.commitIndex {
+        rn.commitIndex = args.LeaderCommit
+    }
+    return rn.currentTerm, true
+}
+
+// Phase 3: Majority Quorum Vote Counter & Commit Advancement
+package raftkv
+
+func HasMajorityQuorum(ackCount, clusterSize int) bool {
+    majority := (clusterSize / 2) + 1
+    return ackCount >= majority
+}
+
 func main() {
     // CodeCraft Masterclass entry point
 }

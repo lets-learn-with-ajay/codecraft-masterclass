@@ -1,3 +1,29 @@
+// Phase 1: Hybrid Logical Clock (HLC) & LWW-Element-Set Block CRDT
+export interface CrdtBlockRegister {
+  blockId: string;
+  value: string;
+  hlcTimestamp: number;
+  peerId: string;
+}
+
+export function mergeBlockRegisters(local: CrdtBlockRegister, remote: CrdtBlockRegister): CrdtBlockRegister {
+  if (remote.hlcTimestamp > local.hlcTimestamp) return remote;
+  if (remote.hlcTimestamp < local.hlcTimestamp) return local;
+  return remote.peerId > local.peerId ? remote : local;
+}
+
+// Phase 2: Edge Presence Coordinator & Ephemeral Cursor Broadcast
+export interface PeerCursorPresence {
+  peerId: string;
+  activeBlockId: string;
+  selectionOffset: number;
+  heartbeatMs: number;
+}
+
+export function pruneStalePeers(peers: PeerCursorPresence[], nowMs: number, ttlMs = 15000): PeerCursorPresence[] {
+  return peers.filter((p) => nowMs - p.heartbeatMs <= ttlMs);
+}
+
 // Phase 3: Durable Edge-to-Postgres CRDT Checkpoint Compaction
 'use server';
 import { db } from '@/lib/postgres';

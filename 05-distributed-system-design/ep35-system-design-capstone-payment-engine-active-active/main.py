@@ -16,3 +16,20 @@ class ConsistentHashRing:
             h = self._hash(f'{shard_id}:vnode:{i}')
             bisect.insort(self.ring, h)
             self.node_map[h] = shard_id
+
+# Phase 2: Deterministic Partition Routing & Quorum Lookup
+    def route_key(self, partition_key: str) -> str:
+        if not self.ring:
+            raise RuntimeError('No active storage shards in ring')
+        h = self._hash(partition_key)
+        idx = bisect.bisect_right(self.ring, h)
+        if idx == len(self.ring):
+            idx = 0
+        return self.node_map[self.ring[idx]]
+
+# Phase 3: Idempotent Consumer Deduplication & Outbox Commit
+def process_distributed_event(event_id: str, payload: dict, seen_ledger: set[str]) -> dict:
+    if event_id in seen_ledger:
+        return {'status': 'DUPLICATE_SKIPPED', 'event_id': event_id}
+    seen_ledger.add(event_id)
+    return {'status': 'COMMITTED', 'event_id': event_id, 'keys': len(payload)}

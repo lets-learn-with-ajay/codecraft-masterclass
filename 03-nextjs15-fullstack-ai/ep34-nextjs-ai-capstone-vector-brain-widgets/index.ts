@@ -16,3 +16,27 @@ export function computeBlockDelta(
     return existingHashes[b.blockId] !== hash;
   });
 }
+
+// Phase 2: Generative UI Tool Router Streaming Interactive Workspace Cards
+import { z } from 'zod';
+
+export const KanbanBoardToolSchema = z.object({
+  boardTitle: z.string(),
+  columns: z.array(z.object({
+    status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']),
+    tasks: z.array(z.object({ id: z.string(), title: z.string(), sourceBlockId: z.string() })),
+  })),
+});
+
+export type KanbanBoardSpec = z.infer<typeof KanbanBoardToolSchema>;
+
+// Phase 3: Bi-Directional Block Citation Anchor & Scroll Highlighter
+export interface BlockCitationRef {
+  citationIndex: number;
+  sourceBlockId: string;
+  similarityScore: number;
+}
+
+export function filterVerifiedBlockCitations(refs: BlockCitationRef[], minScore = 0.78): BlockCitationRef[] {
+  return refs.filter((r) => r.similarityScore >= minScore);
+}
