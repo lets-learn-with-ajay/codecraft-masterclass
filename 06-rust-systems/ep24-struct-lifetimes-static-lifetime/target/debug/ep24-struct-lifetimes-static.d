@@ -1,0 +1,1 @@
+/Users/ajaysingh/Ajay/test/youtube-pipeline/github-repo/codecraft-masterclass/06-rust-systems/ep24-struct-lifetimes-static-lifetime/target/debug/ep24-struct-lifetimes-static: /Users/ajaysingh/Ajay/test/youtube-pipeline/github-repo/codecraft-masterclass/06-rust-systems/ep24-struct-lifetimes-static-lifetime/src/main.rs
