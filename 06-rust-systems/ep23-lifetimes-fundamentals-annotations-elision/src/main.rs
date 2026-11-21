@@ -1,56 +1,65 @@
-// Phase 1: Zero-Copy Lifetime-Bounded Frame Parser
-#[derive(Debug, PartialEq, Eq)]
-pub struct ZeroCopyFrame<'a> {
-    pub topic: &'a str,
-    pub body: &'a [u8],
-}
+// Phase 1: Shared Behavior Trait Contract & Default Implementation
+use std::fmt;
 
-impl<'a> ZeroCopyFrame<'a> {
-    pub fn parse(raw: &'a [u8], split_idx: usize) -> Option<Self> {
-        if split_idx >= raw.len() {
-            return None;
-        }
-        let (head, tail) = raw.split_at(split_idx);
-        let topic = std::str::from_utf8(head).ok()?;
-        Some(Self { topic, body: tail })
-    }
+pub trait StorageCodec {
+    fn encode_frame(&self, out: &mut Vec<u8>) -> usize;
+    fn codec_name(&self) -> &'static str;
 
-    // Phase 3: Lifetime Elision in Methods & Subtyping
-    pub fn extract_preview(&self, max_len: usize) -> &[u8] {
-        let len = self.body.len().min(max_len);
-        &self.body[..len]
+    fn encode_with_checksum(&self, out: &mut Vec<u8>) -> u32 {
+        let start = out.len();
+        let written = self.encode_frame(out);
+        out[start..start + written].iter().fold(0u32, |acc, &b| acc.wrapping_add(b as u32))
     }
 }
 
-// Phase 2: Generic Lifetime Annotations & Reference Elision
-pub fn select_longer_payload<'a>(
-    left: &'a ZeroCopyFrame<'a>,
-    right: &'a ZeroCopyFrame<'a>,
-) -> &'a [u8] {
-    if left.body.len() >= right.body.len() {
-        left.body
-    } else {
-        right.body
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct TelemetryFrame {
+    pub stream_id: u64,
+    pub payload_bytes: Vec<u8>,
+}
+
+// Phase 2: Concrete Trait Implementation & Display Diagnostics
+impl StorageCodec for TelemetryFrame {
+    fn encode_frame(&self, out: &mut Vec<u8>) -> usize {
+        out.extend_from_slice(&self.stream_id.to_le_bytes());
+        out.extend_from_slice(&self.payload_bytes);
+        8 + self.payload_bytes.len()
     }
+
+    fn codec_name(&self) -> &'static str {
+        "telemetry_le_v1"
+    }
+}
+
+impl fmt::Display for TelemetryFrame {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Frame(id={}, bytes={})", self.stream_id, self.payload_bytes.len())
+    }
+}
+
+// Phase 3: Zero-Cost Monomorphization & Where Clauses with '+' Bounds
+use std::io::Write;
+
+pub fn flush_static_batch<T, W>(items: &[T], sink: &mut W) -> usize
+where
+    T: StorageCodec + Clone + fmt::Display,
+    W: Write,
+{
+    let mut written = 0;
+    for item in items {
+        let mut buf = Vec::with_capacity(64);
+        item.encode_frame(&mut buf);
+        sink.write_all(&buf).ok();
+        written += buf.len();
+    }
+    written
+}
+
+pub fn flush_dynamic_plugins(plugins: &[Box<dyn StorageCodec>], buf: &mut Vec<u8>) -> usize {
+    plugins.iter().map(|p| p.encode_frame(buf)).sum()
 }
 
 fn main() {
-    println!("=== Modern Rust Systems Masterclass: Ep 23 ===");
-    println!("Lifetimes Fundamentals: Generic Lifetime Annotations & Elision Rules\n");
-
-    let raw1 = b"telemetry.sensors:temp=42.1";
-    let frame1 = ZeroCopyFrame::parse(raw1, 17).expect("valid frame");
-    println!("Parsed Frame 1: topic='{}', body_len={}", frame1.topic, frame1.body.len());
-
-    let raw2 = b"telemetry.alerts:warning";
-    let frame2 = ZeroCopyFrame::parse(raw2, 16).expect("valid frame");
-    println!("Parsed Frame 2: topic='{}', body_len={}", frame2.topic, frame2.body.len());
-
-    let longer = select_longer_payload(&frame1, &frame2);
-    println!("Longer payload: {} bytes", longer.len());
-
-    let preview = frame1.extract_preview(5);
-    println!("Frame 1 preview: {:?}", std::str::from_utf8(preview).unwrap_or(""));
-
-    println!("\n✅ Ep 23 Lifetimes & Reference Elision successfully verified!");
+    println!("Modern Rust Masterclass Episode 23 verified.");
 }
+

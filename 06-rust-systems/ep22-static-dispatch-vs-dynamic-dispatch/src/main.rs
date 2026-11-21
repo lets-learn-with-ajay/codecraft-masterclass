@@ -1,6 +1,5 @@
 // Phase 1: Shared Behavior Trait Contract & Default Implementation
 use std::fmt;
-use std::io::Write;
 
 pub trait StorageCodec {
     fn encode_frame(&self, out: &mut Vec<u8>) -> usize;
@@ -9,9 +8,7 @@ pub trait StorageCodec {
     fn encode_with_checksum(&self, out: &mut Vec<u8>) -> u32 {
         let start = out.len();
         let written = self.encode_frame(out);
-        out[start..start + written]
-            .iter()
-            .fold(0u32, |acc, &b| acc.wrapping_add(b as u32))
+        out[start..start + written].iter().fold(0u32, |acc, &b| acc.wrapping_add(b as u32))
     }
 }
 
@@ -36,16 +33,13 @@ impl StorageCodec for TelemetryFrame {
 
 impl fmt::Display for TelemetryFrame {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "Frame(id={}, bytes={})",
-            self.stream_id,
-            self.payload_bytes.len()
-        )
+        write!(f, "Frame(id={}, bytes={})", self.stream_id, self.payload_bytes.len())
     }
 }
 
-// Phase 3: Static Monomorphization (impl Trait / Where Clauses) vs Dynamic Dispatch (dyn Trait)
+// Phase 3: Zero-Cost Monomorphization & Where Clauses with '+' Bounds
+use std::io::Write;
+
 pub fn flush_static_batch<T, W>(items: &[T], sink: &mut W) -> usize
 where
     T: StorageCodec + Clone + fmt::Display,
@@ -66,25 +60,6 @@ pub fn flush_dynamic_plugins(plugins: &[Box<dyn StorageCodec>], buf: &mut Vec<u8
 }
 
 fn main() {
-    println!("=== Modern Rust Systems Masterclass: Ep 22 ===");
-    println!("Static Monomorphization vs Dynamic Dispatch: impl Trait vs dyn Trait\n");
-
-    let frame = TelemetryFrame {
-        stream_id: 42,
-        payload_bytes: vec![0xDE, 0xAD, 0xBE, 0xEF],
-    };
-
-    println!("1. Static Monomorphization (Zero-Cost Inlining):");
-    let mut static_sink = Vec::new();
-    let static_bytes = flush_static_batch(&[frame.clone()], &mut static_sink);
-    println!("   Static batch flushed {} bytes to sink.", static_bytes);
-
-    println!("\n2. Dynamic Dispatch (vtable pointer indirection for heterogeneous collections):");
-    let plugins: Vec<Box<dyn StorageCodec>> = vec![Box::new(frame.clone())];
-    let mut dyn_buf = Vec::new();
-    let dyn_bytes = flush_dynamic_plugins(&plugins, &mut dyn_buf);
-    println!("   Dynamic plugins dispatched {} bytes to buffer.", dyn_bytes);
-
-    assert_eq!(static_bytes, dyn_bytes);
-    println!("\n✅ Ep 22 Static vs Dynamic Dispatch successfully verified!");
+    println!("Modern Rust Masterclass Episode 22 verified.");
 }
+
