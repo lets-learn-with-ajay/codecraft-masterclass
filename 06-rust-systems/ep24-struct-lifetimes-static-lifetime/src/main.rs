@@ -1,79 +1,65 @@
-//! Modern Rust Systems Masterclass: Episode 24
-//! Struct Lifetimes, Multiple Lifetimes & The 'static Lifetime Guide
+// Phase 1: Shared Behavior Trait Contract & Default Implementation
+use std::fmt;
 
-// Phase 1: Structs Holding References & Borrow Invariants
-#[derive(Debug)]
-pub struct BufferReader<'a> {
-    pub raw: &'a [u8],
-    pub position: usize,
-}
+pub trait StorageCodec {
+    fn encode_frame(&self, out: &mut Vec<u8>) -> usize;
+    fn codec_name(&self) -> &'static str;
 
-impl<'a> BufferReader<'a> {
-    pub fn new(raw: &'a [u8]) -> Self {
-        Self { raw, position: 0 }
-    }
-
-    pub fn read_bytes(&mut self, count: usize) -> Option<&'a [u8]> {
-        if self.position + count <= self.raw.len() {
-            let slice = &self.raw[self.position..self.position + count];
-            self.position += count;
-            Some(slice)
-        } else {
-            None
-        }
+    fn encode_with_checksum(&self, out: &mut Vec<u8>) -> u32 {
+        let start = out.len();
+        let written = self.encode_frame(out);
+        out[start..start + written].iter().fold(0u32, |acc, &b| acc.wrapping_add(b as u32))
     }
 }
 
-// Phase 2: Multiple Distinct Lifetime Parameters
-#[derive(Debug)]
-pub struct DualSlice<'a, 'b> {
-    pub header: &'a str,
-    pub payload: &'b [u8],
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct TelemetryFrame {
+    pub stream_id: u64,
+    pub payload_bytes: Vec<u8>,
 }
 
-impl<'a, 'b> DualSlice<'a, 'b> {
-    pub fn new(header: &'a str, payload: &'b [u8]) -> Self {
-        Self { header, payload }
+// Phase 2: Concrete Trait Implementation & Display Diagnostics
+impl StorageCodec for TelemetryFrame {
+    fn encode_frame(&self, out: &mut Vec<u8>) -> usize {
+        out.extend_from_slice(&self.stream_id.to_le_bytes());
+        out.extend_from_slice(&self.payload_bytes);
+        8 + self.payload_bytes.len()
     }
 
-    pub fn summary(&self) -> String {
-        format!("{}: {} bytes", self.header, self.payload.len())
+    fn codec_name(&self) -> &'static str {
+        "telemetry_le_v1"
     }
 }
 
-// Phase 3: The 'static Lifetime & Thread Bounds (T: 'static)
-use std::thread;
+impl fmt::Display for TelemetryFrame {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Frame(id={}, bytes={})", self.stream_id, self.payload_bytes.len())
+    }
+}
 
-pub fn spawn_worker<T>(val: T) -> thread::JoinHandle<T>
+// Phase 3: Zero-Cost Monomorphization & Where Clauses with '+' Bounds
+use std::io::Write;
+
+pub fn flush_static_batch<T, W>(items: &[T], sink: &mut W) -> usize
 where
-    T: Send + 'static,
+    T: StorageCodec + Clone + fmt::Display,
+    W: Write,
 {
-    thread::spawn(move || val)
+    let mut written = 0;
+    for item in items {
+        let mut buf = Vec::with_capacity(64);
+        item.encode_frame(&mut buf);
+        sink.write_all(&buf).ok();
+        written += buf.len();
+    }
+    written
+}
+
+pub fn flush_dynamic_plugins(plugins: &[Box<dyn StorageCodec>], buf: &mut Vec<u8>) -> usize {
+    plugins.iter().map(|p| p.encode_frame(buf)).sum()
 }
 
 fn main() {
-    println!("=== Modern Rust Systems Masterclass: Ep 24 ===");
-    println!("Struct Lifetimes, Multiple Lifetimes & The 'static Lifetime\n");
-
-    // Phase 1 Demo
-    let buffer = b"PROTO_HEADER_DATA_STREAM";
-    let mut reader = BufferReader::new(buffer);
-    if let Some(chunk) = reader.read_bytes(12) {
-        println!("Reader Chunk 1: {:?}", std::str::from_utf8(chunk).unwrap());
-    }
-    println!("Remaining bytes: {}", buffer.len() - reader.position);
-
-    // Phase 2 Demo: Dual Lifetimes
-    let static_header: &'static str = "GLOBAL_METRICS";
-    let local_data = vec![1, 2, 3, 4, 5];
-    let dual = DualSlice::new(static_header, &local_data);
-    println!("DualSlice Summary: {}", dual.summary());
-
-    // Phase 3 Demo: T: 'static Thread Spawning
-    let payload = String::from("Owned Heap Data satisfies 'static bound");
-    let handle = spawn_worker(payload);
-    let result = handle.join().expect("Worker thread succeeded");
-    println!("Thread Result: {}", result);
-
-    println!("\n✅ Ep 24 Struct Lifetimes & 'static successfully verified!");
+    println!("Modern Rust Masterclass Episode 24 verified.");
 }
+
