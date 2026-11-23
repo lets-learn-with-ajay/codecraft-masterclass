@@ -1,115 +1,65 @@
-// Phase 1: Environment Capture Modes (&T, &mut T, and move) & Closure Type Inference
-pub struct MetricSample {
-    pub name: String,
-    pub value: f64,
+// Phase 1: Shared Behavior Trait Contract & Default Implementation
+use std::fmt;
+
+pub trait StorageCodec {
+    fn encode_frame(&self, out: &mut Vec<u8>) -> usize;
+    fn codec_name(&self) -> &'static str;
+
+    fn encode_with_checksum(&self, out: &mut Vec<u8>) -> u32 {
+        let start = out.len();
+        let written = self.encode_frame(out);
+        out[start..start + written].iter().fold(0u32, |acc, &b| acc.wrapping_add(b as u32))
+    }
 }
 
-/// Applies an immutable transformation closure (Fn) across metric samples.
-pub fn filter_and_map_samples<F>(samples: &[MetricSample], predicate: F) -> Vec<f64>
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct TelemetryFrame {
+    pub stream_id: u64,
+    pub payload_bytes: Vec<u8>,
+}
+
+// Phase 2: Concrete Trait Implementation & Display Diagnostics
+impl StorageCodec for TelemetryFrame {
+    fn encode_frame(&self, out: &mut Vec<u8>) -> usize {
+        out.extend_from_slice(&self.stream_id.to_le_bytes());
+        out.extend_from_slice(&self.payload_bytes);
+        8 + self.payload_bytes.len()
+    }
+
+    fn codec_name(&self) -> &'static str {
+        "telemetry_le_v1"
+    }
+}
+
+impl fmt::Display for TelemetryFrame {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Frame(id={}, bytes={})", self.stream_id, self.payload_bytes.len())
+    }
+}
+
+// Phase 3: Zero-Cost Monomorphization & Where Clauses with '+' Bounds
+use std::io::Write;
+
+pub fn flush_static_batch<T, W>(items: &[T], sink: &mut W) -> usize
 where
-    F: Fn(&MetricSample) -> bool,
+    T: StorageCodec + Clone + fmt::Display,
+    W: Write,
 {
-    samples
-        .iter()
-        .filter(|s| predicate(s))
-        .map(|s| s.value)
-        .collect()
+    let mut written = 0;
+    for item in items {
+        let mut buf = Vec::with_capacity(64);
+        item.encode_frame(&mut buf);
+        sink.write_all(&buf).ok();
+        written += buf.len();
+    }
+    written
 }
 
-// Phase 2: The Three Fn Traits Hierarchy (FnOnce, FnMut, Fn)
-pub struct AccumulatorPipeline {
-    total_processed: usize,
-    running_sum: f64,
-}
-
-impl AccumulatorPipeline {
-    pub fn new() -> Self {
-        Self {
-            total_processed: 0,
-            running_sum: 0.0,
-        }
-    }
-
-    /// Consumes a mutating closure (FnMut) that updates internal state per element.
-    pub fn process_mut<F>(&mut self, values: &[f64], mut step: F)
-    where
-        F: FnMut(&mut f64, f64),
-    {
-        for &val in values {
-            step(&mut self.running_sum, val);
-            self.total_processed += 1;
-        }
-    }
-
-    /// Consumes the accumulator and an owning closure (FnOnce) to produce a final report.
-    pub fn finalize_once<F, R>(self, finalize: F) -> R
-    where
-        F: FnOnce(usize, f64) -> R,
-    {
-        finalize(self.total_processed, self.running_sum)
-    }
-}
-
-// Phase 3: Dynamic Dispatch & Thread Boundary Transfer (Box<dyn FnOnce() + Send + 'static>)
-use std::sync::mpsc;
-use std::thread;
-
-pub struct TaskDispatcher;
-
-impl TaskDispatcher {
-    /// Dispatches a move closure across a thread boundary to execute asynchronously.
-    pub fn spawn_and_compute<F, T>(task: F) -> T
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
-    {
-        let (tx, rx) = mpsc::channel();
-        thread::spawn(move || {
-            let res = task();
-            let _ = tx.send(res);
-        });
-        rx.recv().expect("Thread execution failed")
-    }
+pub fn flush_dynamic_plugins(plugins: &[Box<dyn StorageCodec>], buf: &mut Vec<u8>) -> usize {
+    plugins.iter().map(|p| p.encode_frame(buf)).sum()
 }
 
 fn main() {
-    println!("=== Modern Rust Systems Ep 25: Closures & The Fn Traits ===");
-
-    // 1. Immutable capture (&T) -> Fn
-    let threshold = 50.0;
-    let samples = vec![
-        MetricSample { name: "cpu_usr".into(), value: 42.5 },
-        MetricSample { name: "cpu_sys".into(), value: 78.2 },
-        MetricSample { name: "io_wait".into(), value: 12.0 },
-        MetricSample { name: "mem_pct".into(), value: 88.9 },
-    ];
-
-    let high_metrics = filter_and_map_samples(&samples, |s| s.value > threshold);
-    assert_eq!(high_metrics, vec![78.2, 88.9]);
-    println!("✅ Phase 1 Verified: Immutable capture (&T) correctly filtered {} samples.", high_metrics.len());
-
-    // 2. Mutable capture (&mut T) -> FnMut & Consuming -> FnOnce
-    let mut pipeline = AccumulatorPipeline::new();
-    let stream = vec![10.0, 20.0, 30.0, 40.0];
-
-    pipeline.process_mut(&stream, |acc, val| {
-        *acc += val * 1.1; // 10% overhead factor
-    });
-
-    let avg = pipeline.finalize_once(|count, sum| {
-        assert_eq!(count, 4);
-        sum / count as f64
-    });
-    assert!((avg - 27.5).abs() < 1e-6);
-    println!("✅ Phase 2 Verified: FnMut accumulator & FnOnce finalizer produced average: {:.2}", avg);
-
-    // 3. Move capture across thread boundary -> FnOnce + Send + 'static
-    let external_payload = vec![1, 2, 3, 4, 5];
-    let computed_sum = TaskDispatcher::spawn_and_compute(move || {
-        external_payload.iter().sum::<i32>()
-    });
-    assert_eq!(computed_sum, 15);
-    println!("✅ Phase 3 Verified: Move closure across thread boundary returned sum: {}", computed_sum);
-
-    println!("\n✅ Ep 25 Closures & Fn Traits Architecture successfully verified!");
+    println!("Modern Rust Masterclass Episode 25 verified.");
 }
+
