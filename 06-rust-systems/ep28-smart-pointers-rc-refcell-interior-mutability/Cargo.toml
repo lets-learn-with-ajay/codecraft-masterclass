@@ -1,0 +1,6 @@
+[package]
+name = "ep28-smart-pointers-rc-refcell-interior-mutability"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
